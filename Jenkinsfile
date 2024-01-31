@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     // Push the Docker image to the registry
-                    docker.withRegistry("${DOCKER_REGISTRY_URL}", 'docker-credentials-id') {
+                    docker.withRegistry("${DOCKER_REGISTRY_URL}", 'docker-hub-credentials-id') {
                         dockerImage.push("${DOCKER_IMAGE_TAG}")
                     }
                 }
