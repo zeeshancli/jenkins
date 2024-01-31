@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = 'zeeshan321/jenkinsdocker'
-        DOCKER_REGISTRY_URL = 'https://hub.docker.com/repositories/zeeshan321'
+        DOCKER_REGISTRY_URL = 'https://hub.docker.com'
         DOCKER_IMAGE_TAG = 'latest'
     }
 
