@@ -19,7 +19,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                    docker.withRegistry('https://hub.docker.com', DOCKER_HUB_CREDENTIALS) {
                         def customImage = docker.build(DOCKER_IMAGE_NAME)
                         customImage.push()
                     }
