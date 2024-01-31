@@ -33,7 +33,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'kube-config-credentials-id', variable: 'KUBECONFIG')]) {
                         sh """
                             kubectl config use-context your-aks-context
-                            kubectl apply -f your-kubernetes-manifests-directory/
+                            kubectl apply -f deployment.yaml
                         """
                     }
                 }
