@@ -1,33 +1,43 @@
-//DECLARATIVE
 pipeline {
-	agent any
-	stages { 
-		stage('build') {
-			steps {
-				echo "build"
-				echo "test"
-				echo "integration test"
-			}
-		}
-		stage('integration test') {
-			steps {
-				echo "build"
-				echo "test"
-				echo "integration test"
-			}
-		}
-	} 
-	post {
-		always { 
-			echo 'im awesome . i run always'
-		}
-		success {
-			echo ' i run when you are successful'
-		}
-		failure {
-			echo ' i run when you are successful'
+    agent any
 
-	
-		}
-	}
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials-id') // Use the ID of Jenkins credentials storing Docker Hub username and password
+        DOCKER_IMAGE_NAME = "zeeshan321/jenkins-docker"
+        KUBE_CONFIG = credentials('kube-config-credentials-id') // Use the ID of Jenkins credentials storing your AKS kubeconfig
+        KUBE_NAMESPACE = "default"
+        KUBE_DEPLOYMENT_NAME = "kubectl"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                        def customImage = docker.build(DOCKER_IMAGE_NAME)
+                        customImage.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to AKS') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'kube-config-credentials-id', variable: 'KUBECONFIG')]) {
+                        sh """
+                            kubectl config use-context your-aks-context
+                            kubectl apply -f your-kubernetes-manifests-directory/
+                        """
+                    }
+                }
+            }
+        }
+    }
 }
