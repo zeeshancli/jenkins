@@ -2,11 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials-id') // Use the ID of Jenkins credentials storing Docker Hub username and password
-        DOCKER_IMAGE_NAME = "zeeshan321/jenkins-docker"
-        KUBE_CONFIG = credentials('kube-config-credentials-id') // Use the ID of Jenkins credentials storing your AKS kubeconfig
-        KUBE_NAMESPACE = "default"
-        KUBE_DEPLOYMENT_NAME = "kubectl"
+        DOCKER_IMAGE_NAME = 'zeeshan321/jenkinsdocker'
+        DOCKER_REGISTRY_URL = 'https://hub.docker.com/repositories/zeeshan321'
+        DOCKER_IMAGE_TAG = 'latest'
     }
 
     stages {
@@ -19,13 +17,24 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        def customImage = docker.build(DOCKER_IMAGE_NAME)
-                        customImage.push()
+                    // Build the Docker image
+                    dockerImage = docker.build("${DOCKER_REGISTRY_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to the registry
+                    docker.withRegistry("${DOCKER_REGISTRY_URL}", 'docker-credentials-id') {
+                        dockerImage.push("${DOCKER_IMAGE_TAG}")
                     }
                 }
             }
         }
+    
+
 
         stage('Deploy to AKS') {
             steps {
