@@ -14,7 +14,7 @@ pipeline {
         stage('Push image to hub') {
             steps {
                 script {
-                    sh 'docker login -u zeeshan321 -p Zeeshan@100 '
+                    sh 'docker login -u zeeshan321 -p Zeeshan@100'
                     sh 'docker push zeeshan321/docker-jenkins:public' // Corrected line
                 }
             }
