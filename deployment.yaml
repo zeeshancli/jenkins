@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: currency-exchange
-        image: zeeshan321/jenkins-docker
+        image: zeeshan321/jenkins-docker:public
         imagePullPolicy: IfNotPresent
         ports:
         - name: liveness-port
