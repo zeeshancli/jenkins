@@ -7,15 +7,15 @@ pipeline {
         stage('Build docker image') {
             steps {
                 script {
-                    sh 'docker build -t https://hub.docker.com/zeeshan321/dockerjenkins:public .'
+                    sh 'docker build -t zeeshan321/docker-jenkins:public .'
                 }
             }
         }
         stage('Push image to hub') {
             steps {
                 script {
-                    sh 'docker login -u zeeshan321 -p Zeeshan@100 https://hub.docker.com/zeeshan321'
-                    sh 'docker push https://hub.docker.com/zeeshan321/dockerjenkins:public' // Corrected line
+                    sh 'docker login -u zeeshan321 -p Zeeshan@100 https://hub.docker.com'
+                    sh 'docker push zeeshan321/docker-jenkins:public' // Corrected line
                 }
             }
         }
