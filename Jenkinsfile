@@ -1,52 +1,37 @@
 pipeline {
-    agent any
-
-    environment {
-        DOCKER_IMAGE_NAME = 'zeeshan321/jenkinsdocker'
-        DOCKER_REGISTRY_URL = 'https://hub.docker.com'
-        DOCKER_IMAGE_TAG = 'latest'
+    agent {
+        label "docker"
     }
-
     stages {
-        stage('Checkout') {
+        stage('Build Maven') {
             steps {
-                checkout scm
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'http://git.kodekloud.com:3000/max/playground-project.git']]])
+                sh 'mvn clean install'
             }
         }
-
-        stage('Build Docker Image') {
+        stage('Build docker image') {
             steps {
                 script {
-                    // Build the Docker image
-                    dockerImage = docker.build("${DOCKER_REGISTRY_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
+                    sh 'docker build -t docker-host:5000/playground-image:public .'
                 }
             }
         }
-
-        stage('Push Docker Image') {
+        stage('Push image to hub') {
             steps {
                 script {
-                    // Push the Docker image to the registry
-                    docker.withRegistry("${DOCKER_REGISTRY_URL}", 'docker-hub-credentials-id') {
-                        dockerImage.push("${DOCKER_IMAGE_TAG}")
-                    }
+                    sh 'docker login -u dock_user -p dock_password docker-host:5000'
+                    sh 'docker push docker-host:5000/playground-image:public' // Corrected line
                 }
             }
         }
-    
-
-
-        stage('Deploy to AKS') {
+        stage('Deploy on K8s Cluster') {
             steps {
-                script {
-                    withCredentials([file(credentialsId: 'kube-config-credentials-id', variable: 'KUBECONFIG')]) {
-                        sh """
-                            kubectl config use-context your-aks-context
-                            kubectl apply -f deployment.yaml
-                        """
-                    }
+                withKubeConfig(caCertificate: "${KUBE_CERT}", clusterName: 'kubernetes', contextName: 'kubernetes-admin@kubernetes', credentialsId: 'my-kube-config-credentials', namespace: 'default', restrictKubeConfigAccess: false, serverUrl: 'https://jump-host:6443') 
+                {
+                sh 'kubectl apply -f manifests.yaml'
+                sh 'kubectl get all'
                 }
             }
-        }
+        }    
     }
 }
